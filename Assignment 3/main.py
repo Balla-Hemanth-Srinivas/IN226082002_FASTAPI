@@ -55,6 +55,30 @@ def product_audit():
         }
     }
 
+from fastapi import Query
+
+@app.put("/products/discount")
+def bulk_discount(
+    category: str = Query(..., description="Category to discount"),
+    discount_percent: int = Query(..., ge=1, le=99, description="Discount percentage")
+):
+
+    updated_products = []
+
+    for p in products:
+        if p["category"] == category:
+            p["price"] = int(p["price"] * (1 - discount_percent / 100))
+            updated_products.append(p)
+
+    if not updated_products:
+        return {"message": f"No products found in category: {category}"}
+
+    return {
+        "message": f"{discount_percent}% discount applied to {category}",
+        "updated_count": len(updated_products),
+        "updated_products": updated_products
+    }
+
 
 # GET single product
 
